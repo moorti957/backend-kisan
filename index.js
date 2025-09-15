@@ -1,36 +1,40 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import dotenv from "dotenv";
 import multer from "multer";
-import Product from "./models/Product.js";  
+import fs from "fs";
+import dotenv from "dotenv";
+import Product from "./models/Product.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-
+// MongoDB connect
 mongoose
   .connect(process.env.MONGO_URI, { dbName: "jayshreekisan" })
-  .then(() => console.log(" MongoDB Connected"))
-  .catch((err) => console.log(" MongoDB Error:", err));
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.log("❌ MongoDB Error:", err));
 
+// Ensure uploads folder exists
+if (!fs.existsSync("./uploads")) {
+  fs.mkdirSync("./uploads");
+}
 
+// Multer setup
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
+  destination: (req, file, cb) => cb(null, "./uploads"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
 
-
+// Static file serve
 app.use("/uploads", express.static("uploads"));
 
-
+// Product routes
 app.post("/api/products", upload.single("image"), async (req, res) => {
   try {
     const productData = {
@@ -45,36 +49,24 @@ app.post("/api/products", upload.single("image"), async (req, res) => {
 
     const product = new Product(productData);
     await product.save();
-    res.json({ success: true, message: " Product saved!", product });
+    res.json({ success: true, message: "Product saved!", product });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
- 
+
 app.get("/api/products", async (req, res) => {
   try {
-    const products = await Product.find().sort({ _id: -1 }); 
+    const products = await Product.find().sort({ _id: -1 });
     res.json({ success: true, products });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
+// Auth routes
+app.use("/api/auth", authRoutes);
 
-app.get("/api/search", async (req, res) => {
-  const query = req.query.q || "";
-  try {
-    const results = await Product.find({
-      name: { $regex: query, $options: "i" }, 
-    });
-    res.json(results);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
+// Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-);
+app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
