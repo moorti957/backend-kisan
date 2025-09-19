@@ -6,6 +6,9 @@ import fs from "fs";
 import dotenv from "dotenv";
 import Product from "./models/Product.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import newsletterRoutes from "./routes/newsletterRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 dotenv.config();
 
@@ -66,6 +69,12 @@ app.get("/api/products", async (req, res) => {
 
 // Auth routes
 app.use("/api/auth", authRoutes);
+
+app.use("/api/users", userRoutes);
+
+app.use("/api/newsletter", newsletterRoutes);
+
+app.use("/api/payment", paymentRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
