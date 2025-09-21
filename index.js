@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import newsletterRoutes from "./routes/newsletterRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 
 dotenv.config();
 
@@ -75,6 +76,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 
 app.use("/api/payment", paymentRoutes);
+
+app.use("/api/products", productRoutes);
+
+
+
 
 // Start server
 const PORT = process.env.PORT || 5000;
