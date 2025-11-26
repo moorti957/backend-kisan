@@ -79,4 +79,14 @@ router.post("/verify", async (req, res) => {
   }
 });
 
+router.get("/all", async (req, res) => {
+  try {
+    const payments = await Payment.find().populate("user", "firstName lastName email");
+    res.json(payments);
+  } catch (error) {
+    console.error("Fetch all orders error:", error);
+    res.status(500).json({ message: "Error fetching payments" });
+  }
+});
+
 export default router;
